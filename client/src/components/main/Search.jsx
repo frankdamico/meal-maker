@@ -7,6 +7,7 @@ import RecipeInstructions from '../login/RecipeInstructions.jsx';
 import RecipeList from './RecipeList.jsx';
 import AutoComplete from './AutoComplete.jsx';
 
+
 // eslint-disable-next-line react/prefer-stateless-function
 class Search extends React.Component {
   constructor(props) {
@@ -16,16 +17,19 @@ class Search extends React.Component {
   }
 
   render() {
-    const { recipeOfTheDay, recipes, getRecipes, ingredients, saveRecipe, saveDislikeRecipe } = this.props;
+    const { recipeOfTheDay, recipes, getRecipes, ingredients, saveRecipe, saveDislikeRecipe, selectRecipe, changeView, user } = this.props;
     return (
       <div>
-        <h2>Search</h2>
+        <h2 className="Lobster">
+          Welcome, {user}
+        </h2>
+        <h3>Search for a recipe</h3>
         <div className="Search-Comp">
-        <AutoComplete ingredients={ingredients} addIngredient={this.addIngredient} getRecipes={getRecipes} />
+          <AutoComplete ingredients={ingredients} addIngredient={this.addIngredient} getRecipes={getRecipes} />
         </div>
 
         <div>
-          <RecipeList recipes={recipes} saveRecipe={saveRecipe} saveDislikeRecipe={saveDislikeRecipe}> </RecipeList>
+          <RecipeList recipes={recipes} saveRecipe={saveRecipe} saveDislikeRecipe={saveDislikeRecipe} selectRecipe={selectRecipe} changeView={changeView}> </RecipeList>
         </div>
 
 

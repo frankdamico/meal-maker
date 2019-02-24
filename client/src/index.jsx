@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 // rendering all components
 /* eslint import/extensions: 0 */
 import React from 'react';
@@ -12,6 +13,9 @@ import RecipeInstructions from './components/login/RecipeInstructions.jsx';
 import VideoPlayer from './components/VideoPlayer.jsx';
 import randomRecipe from '../example_random.js';
 import Main from './components/main/Main.jsx';
+// import LightBackground from './images/backgroundlight.jpg'; // Tell Webpack this JS file uses this image
+
+// console.log(LightBackground);
 
 class App extends React.Component {
   constructor(props) {
@@ -21,8 +25,11 @@ class App extends React.Component {
       recipeOfTheDay: randomRecipe, // recipe of the day video
       savedRecipes: [],
       ingredients: [],
-      userId: 1,
+      userId: 0,
       selectedRecipe: randomRecipe,
+      authorized: false,
+      show: 'login',
+      userName: '',
       // show: 'search',
     };
     this.getRandomRecipe = this.getRandomRecipe.bind(this);
@@ -36,9 +43,18 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    // let mainComponent = 'login';
+    const { authorized } = this.state;
     this.getRandomRecipe();
     // this.getSavedRecipes();
     this.grabIngredients();
+    if (authorized) {
+      this.setState({
+        show: 'home',
+      });
+    // } else {
+    //   mainComponent = 'login';
+    }
   }
 
   // function to retrieve recipes to display
@@ -93,7 +109,7 @@ class App extends React.Component {
     // console.log('grabbing');
     axios.get('/ingredients')
       .then((allIngOptions) => {
-        console.log(Array.isArray(allIngOptions.data), 'Opt');
+        // console.log(Array.isArray(allIngOptions.data), 'Opt');
         this.setState({
           ingredients: allIngOptions.data,
         });
@@ -135,44 +151,111 @@ class App extends React.Component {
   selectRecipe(recipe) {
     this.setState({
       selectedRecipe: recipe,
-    })
+    });
   }
 
-  signUp(user) {
-    console.log('sign-up');
+  signUp(user, pw) {
+    console.log(`thank you for signing up, ${user}`);
     console.log(`Hello, ${user}`);
+    axios.post('/api/users', {
+      user: {
+        username: user,
+        password: pw,
+      },
+    })
+      .then((res) => {
+        console.log('made to signup');
+        console.log(res.data.user, res.data.user.id, 'RESPONSE');
+        console.log('where is res');
+        this.setState({
+          authorized: true,
+          userId: res.data.user.id,
+          userName: res.data.user.username,
+        });
+        this.componentDidMount();
+      })
+      .catch((bool) => {
+        console.log('could not log in after signup');
+        // this.setState({
+        //   authorized: true,
+        // });
+        // this.componentDidMount();
+      });
   }
 
-  login() {
+  login(user, pw) {
     console.log('logged in');
+    console.log(`Hello, ${user}`);
+    axios.post('/api/users/login', {
+      user: {
+        username: user,
+        password: pw,
+      },
+    })
+      .then((res) => {
+        console.log(res, 'LOGGING IN');
+        this.setState({
+          authorized: true,
+          userName: res.data.user.username,
+        });
+        this.componentDidMount();
+      })
+      .catch(() => {
+        console.log('could not log in');
+        // document.getElementById('username').del
+      //   this.setState({
+      //     authorized: true,
+      //   });
+      //   this.componentDidMount();
+      });
   }
 
   render() {
     console.log(this);
-    const { recipeOfTheDay, selectedRecipe, savedRecipes, recipes, ingredients } = this.state;
+    let mainComponent = 'login';
+    const { recipeOfTheDay, selectedRecipe, savedRecipes, recipes, ingredients, userName } = this.state;
+    if (this.state.show === 'login') {
+      mainComponent = <Login recipe={recipeOfTheDay} signUp={this.signUp} login={this.login} />;
+    } else if (this.state.show === 'home') {
+      mainComponent = (
+        <Main
+          recipes={recipes}
+          recipeOfTheDay={recipeOfTheDay}
+          selectedRecipe={selectedRecipe}
+          savedRecipes={savedRecipes}
+          ingredients={ingredients}
+          getRecipes={this.getRecipes}
+          saveRecipe={this.saveRecipe}
+          saveDislikeRecipe={this.saveDislikeRecipe}
+          getSavedRecipes={this.getSavedRecipes}
+          selectRecipe={this.selectRecipe}
+          user={userName}
+        />
+      );
+    }
     return (
-      // <BrowserRouter>
-      //   <Route path="/login" component={Login} />
-      // </BrowserRouter>
       <div>
-        <div>
-          <Login recipe={recipeOfTheDay} signUp={this.signUp} login={this.login} />
-        </div>
-        <div>
-          <Main
-            recipes={recipes}
-            recipeOfTheDay={recipeOfTheDay}
-            selectedRecipe={selectedRecipe}
-            savedRecipes={savedRecipes}
-            ingredients={ingredients}
-            getRecipes={this.getRecipes}
-            saveRecipe={this.saveRecipe}
-            saveDislikeRecipe={this.saveDislikeRecipe}
-            getSavedRecipes={this.getSavedRecipes}
-            selectRecipe={this.selectRecipe}
-          />
-        </div>
+        {mainComponent}
       </div>
+      // <div>
+      //   <div>
+      //     <Login recipe={recipeOfTheDay} signUp={this.signUp} login={this.login} />
+      //   </div>
+      //   <div>
+      //     <Main
+      //       recipes={recipes}
+      //       recipeOfTheDay={recipeOfTheDay}
+      //       selectedRecipe={selectedRecipe}
+      //       savedRecipes={savedRecipes}
+      //       ingredients={ingredients}
+      //       getRecipes={this.getRecipes}
+      //       saveRecipe={this.saveRecipe}
+      //       saveDislikeRecipe={this.saveDislikeRecipe}
+      //       getSavedRecipes={this.getSavedRecipes}
+      //       selectRecipe={this.selectRecipe}
+      //     />
+      //   </div>
+      // </div>
     );
   }
 }
