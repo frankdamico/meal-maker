@@ -45,14 +45,14 @@ class Main extends React.Component {
     return (
       <div>
         <div className="nav">
-          <img src={logo} width="7%" height="auto" />
-          <span className="mealMakerLogo">mealMaker</span>
+          <input type="image" src={logo} width="7%" height="auto" onClick={() => this.changeView('search')} />
+          <button className="mealMakerLogo" onClick={() => this.changeView('search')}>mealMaker</button>
           <Button variant="contained" color="primary" type="button" className={this.state.view === 'search'
             ? 'nav-selected'
             : 'nav-unselected'}
             onClick={() => this.changeView('search')}
           >
-            Search
+            Home
           </Button>
           <Button variant="contained" color="primary" type="button" className={this.state.view === 'saved'
             ? 'nav-selected'
@@ -63,6 +63,9 @@ class Main extends React.Component {
             }}
           >
             Saved Recipes
+          </Button>
+          <Button variant="contained" color="primary" type="button">
+            Logout
           </Button>
         </div>
 
